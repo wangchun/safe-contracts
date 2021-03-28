@@ -2,7 +2,7 @@ import { task, types } from "hardhat/config";
 import { AddressZero } from "@ethersproject/constants";
 import { getAddress } from "@ethersproject/address";
 import { calculateProxyAddress } from "../../utils/proxies";
-import { safeSingleton, proxyFactory } from "./contracts";
+import { safeSingleton, proxyFactory, contractFactory } from "./contracts";
 
 const parseSigners = (rawSigners: string): string[] => {
     return rawSigners.split(",").map(address => getAddress(address))
@@ -14,9 +14,11 @@ task("create-safe", "Deploys and verifies Safe contracts")
     .addParam("threshold", "Threshold that should be used", 1, types.int, true)
     .addParam("fallback", "Fallback handler address", AddressZero, types.string, true)
     .addParam("nonce", "Nonce used with factory", new Date().getTime(), types.int, true)
+    .addParam("singleton", "Set to overwrite which singleton address to use", undefined, types.string, true)
+    .addParam("factory", "Set to overwrite which factory address to use", undefined, types.string, true)
     .setAction(async (taskArgs, hre) => {
-        const singleton = await safeSingleton(hre, taskArgs.l2)
-        const factory = await proxyFactory(hre)
+        const singleton = await safeSingleton(hre, taskArgs.l2, taskArgs.singleton)
+        const factory = await proxyFactory(hre, taskArgs.singleton)
         const signers: string[] = taskArgs.signers ? parseSigners(taskArgs.signers) : [(await hre.getNamedAccounts()).deployer]
         const fallbackHandler = getAddress(taskArgs.fallback)
         const setupData = singleton.interface.encodeFunctionData(

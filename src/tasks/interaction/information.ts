@@ -5,7 +5,7 @@ import { AddressOne } from "../../utils/constants";
 import { Contract } from "@ethersproject/contracts";
 import { contractFactory } from "./contracts";
 
-const getSingletonAddress = async (hre: HRE, address: string): Promise<string> => {
+export const getSingletonAddress = async (hre: HRE, address: string): Promise<string> => {
     const result = await hre.ethers.provider.getStorageAt(address, 0)
     return getAddress("0x" + result.slice(26))
 }
@@ -33,5 +33,6 @@ task("safe-info", "Returns information about a Safe")
         console.log(`Version: ${await safe.VERSION()}`)
         console.log(`Owners: ${await safe.getOwners()}`)
         console.log(`Threshold: ${await safe.getThreshold()}`)
+        console.log(`Nonce: ${await safe.nonce()}`)
         console.log(`Modules: ${await getModules(hre, safe)}`)
     });
